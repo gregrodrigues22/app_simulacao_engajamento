@@ -979,12 +979,14 @@ if show_sim:
             if submitted:
                 # dicionário 0–1 para a função
                 # metas vindas dos sliders (em %), converta para [0..1]
-                healthy_target = meta_saudaveis / 100.0
+                #healthy_target = meta_saudaveis / 100.0
 
-                target_rates = {}
-                for c in col_condicoes:           # ex.: ["condicao_diabetes", "condicao_dislipidemia", ...]
-                    alvo_pct = st.session_state.get(f"slider_meta_{c}", 0)  # ou a variável correspondente ao slider
-                    target_rates[c] = float(alvo_pct) / 100.0
+                #target_rates = {}
+                #for c in col_condicoes:           # ex.: ["condicao_diabetes", "condicao_dislipidemia", ...]
+                #    alvo_pct = st.session_state.get(f"slider_meta_{c}", 0)  # ou a variável correspondente ao slider
+                #    target_rates[c] = float(alvo_pct) / 100.0
+                healthy_target = meta_saudaveis / 100.0
+                target_rates = {c: expectativa_por_cond[c] / 100.0 for c in col_condicoes}
 
                 # 1) conta o tamanho de cada condição (True = pertence ao grupo)
                 cond_sizes = (
