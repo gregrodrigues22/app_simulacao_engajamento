@@ -110,7 +110,7 @@ def plot_resultado_stack(resultado: pd.DataFrame,
     resultado : DataFrame
         MultiIndex columns: level0 in {'n','%'}, level1 in {False, True, 'All'}.
     colors : dict
-        Mapeamento de cores, ex.: {"Sem atendimento":"lightgray", "Com atendimento":"steelblue"}.
+        Mapeamento de cores, ex.: {"Sem engajamento":"lightgray", "Com engajamento":"steelblue"}.
     show_pct_on_bars : bool
         Se True, exibe “n (xx.x%)” nas barras.
     """
@@ -119,8 +119,8 @@ def plot_resultado_stack(resultado: pd.DataFrame,
     p = resultado["%"].copy()
 
     # renomeia colunas booleanas p/ rótulos.
-    n = n.rename(columns={False: "Sem atendimento", True: "Com atendimento"})
-    p = p.rename(columns={False: "Sem atendimento (%)", True: "Com atendimento (%)"})
+    n = n.rename(columns={False: "Sem engajamento", True: "Com engajamento"})
+    p = p.rename(columns={False: "Sem engajamento (%)", True: "Com engajamento (%)"})
 
     # separa linhas especiais
     idx = n.index.tolist()
@@ -137,9 +137,9 @@ def plot_resultado_stack(resultado: pd.DataFrame,
     p_right = p.loc[right_rest]  if right_rest  else p.iloc[[]]
 
     if colors is None:
-        colors = {"Sem atendimento": "lightgray", "Com atendimento": "steelblue"}
+        colors = {"Sem engajamento": "lightgray", "Com engajamento": "steelblue"}
 
-    cols_n = [c for c in ["Sem atendimento", "Com atendimento"] if c in n.columns]
+    cols_n = [c for c in ["Sem engajamento", "Com engajamento"] if c in n.columns]
     cols_p = [c + " (%)" for c in cols_n]
 
     fig = make_subplots(
@@ -890,7 +890,7 @@ if show_sim:
 
             fig = plot_resultado_stack(
                 resultado,
-                colors={"Sem atendimento":"lightgray", "Com atendimento":"steelblue"},
+                colors={"Sem engajamento":"lightgray", "Com engajamento":"steelblue"},
                 show_pct_on_bars=True
                 )
             st.plotly_chart(fig, use_container_width=True)
@@ -990,7 +990,7 @@ if show_sim:
 
                 fig = plot_resultado_stack(
                 out["resultado"],
-                colors={"Sem atendimento":"lightgray", "Com atendimento":"steelblue"},
+                colors={"Sem engajamento":"lightgray", "Com engajamento":"steelblue"},
                 show_pct_on_bars=True
                 )
                 st.plotly_chart(fig, use_container_width=True)
