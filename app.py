@@ -911,28 +911,35 @@ if show_sim:
             # sempre parte de uma cópia limpa
             df_for_sim = df_base.copy()
 
-            st.info(
-            "Selecione abaixo o percentual de engajamento estimado para cada condição. ")
+            st.info("Selecione abaixo o percentual de engajamento estimado para cada condição.")
 
             st.caption(
-            "O valor setado à princípio é o valor atual. Ao alterar o valor, o que você coloca no slider será o total esperado da subpopulação no cenário simulado. Apenas **aumentos** serão simulados." 
+                "O valor definido a princípio é a **taxa atual** de engajamento do grupo. "
+                "Ao alterar o valor, o slider passa a representar a **taxa-alvo** de engajamento dessa subpopulação no cenário simulado. "
+                "Apenas **aumentos** serão simulados (se a meta ≤ taxa atual, nada muda)."
             )
 
             st.caption(
-            "Uma vez setado os parâmetros, a simulação ocorrerá da seguinte forma:\n" 
-            "- Apenas as pessoas não engajadas são passíveis de engajar.\n"  
-            "- Dentre essas pessoas candidatas, o engajamento simulado será aleatório, ou seja, um sorteio em que todas as pessoas tem a mesma probabilidade de se tornarem engajadas.\n"
-            "- A ideia é converter pessoas suficientes dentro de cada subpopulação até bater a meta de engajamento dessa subpopulação.\n" 
-            "- Como a mesma pessoa pode pertencer a várias subpopopulações (sobreposição), uma vez convertida de forma aleatória primeiramente para atender ao requisito de uma subpopulação, essa mesma pessoa não pode, naturalmente, ser convertida duplamente.\n"
-            "- No entanto, essa pessoa multicomorbida recém convertida para uma subpopulação específica, já contará para a taxa simulada das seguintes subpopulações que fizer parte.\n"
+                "Uma vez definidos os parâmetros, a simulação ocorre assim:\n"
+                "- Apenas as pessoas **não engajadas** são passíveis de engajar.\n"
+                "- Entre essas candidatas, a conversão é **aleatória**: todas têm a mesma probabilidade (exceto no modo determinístico).\n"
+                "- Convertem-se pessoas suficientes **dentro de cada subpopulação** até bater a meta dessa subpopulação.\n"
+                "- Como a mesma pessoa pode pertencer a várias subpopulações (sobreposição), **cada pessoa só pode ser convertida uma vez**; "
+                "após convertida em um grupo, **ela já conta** para os demais grupos dos quais participa.\n"
+                "- **Prioridade do sorteio:** as **condições são processadas do maior para o menor grupo** (tamanho no momento da simulação) e "
+                "os **saudáveis ficam por último**. Assim, grupos maiores escolhem candidatos primeiro."
             )
 
             st.caption(
-            "A título de exemplo, isso significa que, dado um cenário suposto, se um grupo diabético tem 100 pessoas e a meta de engajamento passa a ser 30%, será necessário ter, ao todo, 30 pessoas engajadas nessa subpopulação. Se já existem 22 engajados no estado atual, faltam 8 pessoas a serem engajadas nesse grupo para cumprir a meta simulada.\n"
-            "Dessa forma, o código escolhe aleatoriamente 8 pessoas dentre aquelas elegíveis ao engajamento (ou seja, aquelas 78 ainda não engajadas na subpopulação de diabéticos).\n"
-            "Depois de sorteadas as pessoas diabéticas a serem engajadas, pode-se passar ao engajamento aleatória de outras subpopulações, como a subpopulação hipertensa. Supondo que, para essa subpopulação, existem 150 pessoas hipertensas e a meta de engajamento setada para simulação for 50%, será necessário ter, ao todo, 75 pessoas hipertensas engajadas.\n"
-            "Só que, se 10 dos recém-convertidos em vista da setagem para primeira simulação dos diabéticos também forem hipertensos, e esses forem sorteados para serem engajados também para a simulação do engajmaento da hipertensão, naturalmente eles não poderão ser contados duplamente. Dessa forma, saindo de 0 pessoas engajadas do estado atual, não faltarão 75 pessoas hipertensas para engajar. Mas, na verdade, 75 menos 10, ou seja, 65 pessoas.\n"
-            "Essa regra de negócio está sendo aplicada considerando que todas as estratégias de engajamento ocorrerão de forma simultânea e não sequencial, pois, se assim o fosse, naturalmente as estratégias de engajamento se aplicariam apenas aquelas pessoas não engajadas previamente, por qualquer motivo. Nesse caso, basta simular uma primeira estratégia, verificar o engajamento atual e então simular uma nova estratégia."
+                "Exemplo: se Diabetes tem 100 pessoas e a meta passa a ser 30%, o alvo é 30 engajados. "
+                "Se já houver 22, faltam 8; sorteiam-se 8 entre os 78 não engajados. "
+                "Depois, em Hipertensão (150 pessoas, meta 50% → alvo 75), se 10 dos recém-convertidos em Diabetes também forem hipertensos, "
+                "eles **já contam** para Hipertensão; portanto faltam **65** (75 − 10)."
+            )
+
+            st.caption(
+                "Esta regra modela campanhas ocorrendo **simultaneamente** com resolução por prioridade. "
+                "Se você quiser avaliar estratégias em sequência, simule a primeira, observe o novo estado e, então, ajuste e rode a próxima."
             )
 
             # ---------- detectar condições ----------
@@ -979,8 +986,20 @@ if show_sim:
                     alvo_pct = st.session_state.get(f"slider_meta_{c}", 0)  # ou a variável correspondente ao slider
                     target_rates[c] = float(alvo_pct) / 100.0
 
-                # Ordem de prioridade (ex.: condições antes dos saudáveis; ajuste como preferir)
-                priority = [*col_condicoes, "saudaveis"]
+                # 1) conta o tamanho de cada condição (True = pertence ao grupo)
+                cond_sizes = (
+                    df_for_sim[col_condicoes]                # só as colunas de condição
+                    .fillna(False).astype(bool)              # garante booleano
+                    .sum()                                   # soma True por coluna
+                    .sort_values(ascending=False)            # maior → menor
+                )
+
+                # 2) prioridade: condições por tamanho desc
+                priority = list(cond_sizes.index)
+
+                # 3) põe 'saudaveis' no fim (só se tiver meta pros saudáveis)
+                if (healthy_target is not None) and ("saudaveis" in df_for_sim.columns):
+                    priority += ["saudaveis"]
 
                 df_for_sim = ensure_alguma_condicao(df_for_sim)
 
@@ -993,7 +1012,7 @@ if show_sim:
                     healthy_col="saudaveis",
                     healthy_target=healthy_target,
                     priority_order=priority,       # ou deixe None para padrão
-                    deterministic=True,           # True se quiser comportamento reprodutível sem aleatoriedade
+                    deterministic=False,           # True se quiser comportamento reprodutível sem aleatoriedade
                     seed=42
                 )
 
