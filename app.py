@@ -916,8 +916,50 @@ if show_sim:
 
             st.caption(
             "O valor setado à princípio é o valor atual. " 
+            )
+
+            st.caption(
             "Ao alterar o valor, o que você coloca no slider será o total esperado da subpopulação no cenário simulado. " 
+            )
+
+            st.caption(
             "Apenas **aumentos** serão simulados. "
+            )
+
+            st.caption(
+            "A simulação ocorrerá da seguinte forma: Apenas as pessoas não engajadas são passíveis de engajar.  Dentre essas pessoas candidatas, o engajamento simulado será aleatório, ou seja, um sorteio em que todas as pessoas tem a mesma probabilidade de se tornarem engajadas."
+            )
+
+            st.caption(
+            "A ideia é converter pessoas suficientes dentro de cada subpopulação até bater a meta de engajamento dessa subpopulação. Como a mesma pessoa pode pertencer a várias subpops (sobreposição), existe uma ordem de prioridade para decidir quem escolhe primeiro."
+            )
+
+            st.caption(
+            "Como a mesma pessoa pode pertencer a várias subpopopulações (sobreposição), uma vez convertida de forma aleatória primeiramente para atender ao requisito de uma subpopulação, essa mesma pessoa não pode, naturalmente, ser convertida duplamente."
+            )
+
+            st.caption(
+            "No entanto, essa pessoa multicomorbida recém convertida, para uma subpopulação específica, já contará para a taxa simulada das seguintes subpopulações que fizer parte."
+            )
+
+            st.caption(
+            "A título de exemplo, isso tudo significa, por exemplo, que se um grupo diabético tem 100 pessoas e a meta de engajamento passa a ser 30%, será necessário ter, ao todo, 30 pessoas engajadas nessa subpopulação. Se já existem 22 engajados no estado atual, faltam 8 pessoas a serem engajadas nesse grupo para cumprir a meta simulada."
+            )
+        
+            st.caption(
+            "Dessa forma, o código escolhe aleatoriamente 8 pessoas dentre aquelas elegíveis ao engajamento (ou seja, aquelas 78 ainda não engajadas na subpopulação de diabéticos)."
+            )
+
+            st.caption(
+            "Depois de sorteadas as pessoas diabéticas a serem engajadas, pode-se passar ao engajamento aleatória de outras subpopulações, como a subpopulação hipertensa. Supondo que, para essa subpopulação, existem 150 pessoas hipertensas e a meta de engajamento setada para simulação for 50%, será necessário ter, ao todo, 75 pessoas hipertensas engajadas."
+            )
+
+            st.caption(
+            "Só que, se 10 dos recém-convertidos em vista da setagem de simulação para o diabetes também forem hipertensos, e esses forem sorteados para serem engajados também para a simulação do engajmaento da hipertensão, naturalmente eles não poderão ser contados duplamente. Dessa forma, saindo de 0 pessoas engajadas do estado atual, não faltarão 75 pessoas hipertensas para engajar. Mas, na verdade, 75 menos 10, ou seja, 65 pessoas."
+            )
+
+            st.caption(
+            "Essa regra de negócio está sendo aplicada considerando que todas as estratégias de engajamento ocorrerão de forma simultânea e não sequencial, pois, se assim o fosse, naturalmente as estratégias de engajamento se aplicarão apenas aquelas pessoas não engajadas previamente, por qualquer motivo."
             )
 
             # ---------- detectar condições ----------
@@ -934,7 +976,7 @@ if show_sim:
                 cL, cR = st.columns(2)
 
                 with cL:
-                    st.caption("Engajamento — Saudáveis [OBS: Alguma Condição será derivada pelo complementar] ")
+                    st.caption("Engajamento — Saudáveis (Alguma Condição será derivada pelo complementar) ")
                     meta_saudaveis = st.slider(
                         "Engajamento — **Saudáveis** (%)",
                         min_value=0, max_value=100, value=int(round(def_saudaveis))
