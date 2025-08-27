@@ -466,28 +466,6 @@ def simular_ate_meta_por_subpop(
 if "active_tab" not in st.session_state:
     st.session_state.active_tab = "📤 Upload de bases"
 
-# Função para scrollar para o topo
-#def scroll_top():
-    # força o scroll no elemento pai (iframe) do app
-#    components.html(
-#        """
-#        <script>
-#            // tenta rolar a janela principal
-#            if (window.parent) {
-#                try { window.parent.scrollTo(0, 0); } catch (e) {}
-#                // fallback: tenta rolar a seção principal do Streamlit
-#                try {
-#                    const sec = window.parent.document.querySelector('section.main');
-#                    if (sec) { sec.scrollTo({top: 0, left: 0, behavior: "instant"}); }
-#                } catch (e) {}
-#            } else {
-#                window.scrollTo(0, 0);
-#            }
-#        </script>
-#        """,
-#        height=0,
-#    )
-
 def scroll_top():
     st.markdown("""
     <script>
@@ -883,11 +861,6 @@ if show_sim:
             col_condicoes = [c for c in df_final_loaded.columns if "condicao_" in c]
             col_condicoes_saudaveis = col_condicoes + ["saudaveis"] + ["alguma_condicao"]
 
-            #if "atendimento_ult_trim" in df_final_loaded.columns:  
-            #    options = st.multiselect("Quais condições quer analisar",
-            #    col_condicoes_saudaveis,
-            #    default=col_condicoes_saudaveis)
-
             # ajuste nomes das colunas de condição
             cols = col_condicoes_saudaveis.copy()
 
@@ -942,7 +915,9 @@ if show_sim:
             "Selecione abaixo o percentual de engajamento estimado para cada condição. ")
 
             st.caption(
-            "O valor que você coloca no slider será o total esperado da subpopulação no cenário simulado. Apenas **aumentos** serão simulados "
+            "O valor setado à princípio é o valor atual. " 
+            "Ao alterar o valor, o que você coloca no slider será o total esperado da subpopulação no cenário simulado. " 
+            "Apenas **aumentos** serão simulados. "
             )
 
             # ---------- detectar condições ----------
@@ -959,7 +934,7 @@ if show_sim:
                 cL, cR = st.columns(2)
 
                 with cL:
-                    st.caption("Engajamento — Saudáveis / Alguma Condição (%)")
+                    st.caption("Engajamento — Saudáveis [OBS: Alguma Condição será derivada pelo complementar] ")
                     meta_saudaveis = st.slider(
                         "Engajamento — **Saudáveis** (%)",
                         min_value=0, max_value=100, value=int(round(def_saudaveis))
