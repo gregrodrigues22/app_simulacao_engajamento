@@ -809,18 +809,22 @@ if show_sim:
             scroll_top()
 
             st.header("📊 Simulação")
+            
+            # 1) Carrega do estado
             df_final_loaded = st.session_state.get("df_final")  # pega o df salvo
 
-            # Base original para simulações
+            # 2) Garante que existe antes de seguir
+            if df_final_loaded is None or len(df_final_loaded) == 0:
+                st.warning("Nenhum `Conjunto de Dados Final` disponível. Gere na aba anterior.")
+                st.stop()
+
+            # 3) Base original para simulações
             if "df_base" not in st.session_state:
                 # primeira vez: salva uma cópia limpa
                 st.session_state.df_base = st.session_state["df_final"].copy()
 
+            # 4) Sempre trabalhe a partir de df_base
             df_base = st.session_state.df_base  # <-- SEMPRE use esta como referência
-
-            if df_final_loaded is None:
-                st.warning("Nenhum `Conjunto de Dados Final` disponível. Gere na aba anterior.")
-                st.stop()
 
             st.subheader("1) Estado atual")
 
