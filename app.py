@@ -99,7 +99,7 @@ def to_naive_datetime(series_like):
 def plot_resultado_stack(resultado: pd.DataFrame,
                          colors=None,
                          show_pct_on_bars=True) -> go.Figure:
-    """
+    """ 
     Converte a tabela 'resultado' (com blocos 'n' e '%') em um gráfico Plotly
     com 2 subplots (stacked bars):
       - Esquerda: ['saudaveis', 'alguma_condicao']
@@ -183,6 +183,42 @@ def plot_resultado_stack(resultado: pd.DataFrame,
     add_panel(n_left,  p_left,  col_id=1, showlegend=True)
     add_panel(n_right, p_right, col_id=2, showlegend=False)
 
+    def totals_max(n_df):
+        if n_df.empty: return 0.0
+        present = [c for c in ["Sem engajamento", "Com engajamento"] if c in n_df.columns]
+        return float(n_df[present].sum(axis=1).max())
+
+    ymax_raw = max(totals_max(n_left), totals_max(n_right))
+    # respiro fixo de 10% + arredondamento para cima
+    ymax = float(np.ceil(ymax_raw * 1.10)) if ymax_raw > 0 else 1.0
+
+    def add_totals_labels(n_df, col_id):
+        if n_df.empty: return
+        present = [c for c in ["Sem engajamento", "Com engajamento"] if c in n_df.columns]
+        totals = n_df[present].sum(axis=1)
+
+        bump = max(1, 0.02 * ymax)   # leve afastamento do topo do stack
+        fig.add_trace(
+            go.Scatter(
+                x=n_df.index.astype(str),
+                y=totals + bump,
+                text=[f"{int(v):,}".replace(",", ".") for v in totals],
+                mode="text",
+                textposition="top center",
+                hoverinfo="skip",
+                showlegend=False,
+                cliponaxis=False,
+            ),
+            row=1, col=col_id
+        )
+
+    add_totals_labels(n_left,  col_id=1)
+    add_totals_labels(n_right, col_id=2)
+
+    # controla eixo Y nas duas subplots
+    fig.update_yaxes(range=[0, ymax], row=1, col=1)
+    fig.update_yaxes(range=[0, ymax], row=1, col=2)
+
     fig.update_layout(
         title="Gráfico de Engajamento Atual por subpopulação (n e %)",
         barmode="stack",
@@ -190,7 +226,9 @@ def plot_resultado_stack(resultado: pd.DataFrame,
         yaxis_title="Número de pessoas",
         legend=dict(orientation="h", yanchor="bottom", y=1.08, xanchor="right", x=1),
         margin=dict(l=40, r=20, t=80, b=60),
-        height=520
+        height=520,
+        uniformtext_minsize=9,
+        uniformtext_mode="hide"
     )
     return fig
 
