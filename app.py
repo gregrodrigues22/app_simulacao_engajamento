@@ -219,6 +219,27 @@ def plot_resultado_stack(resultado: pd.DataFrame,
     fig.update_yaxes(range=[0, ymax], row=1, col=1)
     fig.update_yaxes(range=[0, ymax], row=1, col=2)
 
+    # depois de calcular ymax_raw (maior total das barras)
+    ymax_padded = ymax_raw * 1.10  # respiro fixo de 10%
+
+    # escolhe um dtick "bonito" visando ~7 ticks
+    def nice_dtick(span):
+        target_ticks = 7
+        rough = max(1.0, span / target_ticks)
+        mag = 10 ** np.floor(np.log10(rough))
+        for m in [1, 2, 2.5, 5, 10]:
+            if rough <= m * mag:
+                return m * mag
+        return 10 * mag
+
+    dtick = nice_dtick(ymax_padded)
+    # arredonda o topo do eixo para o próximo múltiplo de dtick
+    ymax = float(np.ceil(ymax_padded / dtick) * dtick)
+
+    # aplica nas duas subplots (shared_yaxes=True)
+    fig.update_yaxes(range=[0, ymax], tickmode="linear", dtick=dtick, row=1, col=1)
+    fig.update_yaxes(range=[0, ymax], tickmode="linear", dtick=dtick, row=1, col=2)
+
     fig.update_layout(
         title="Gráfico de Engajamento Atual por subpopulação (n e %)",
         barmode="stack",
