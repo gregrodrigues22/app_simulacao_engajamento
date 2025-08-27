@@ -429,26 +429,41 @@ if "active_tab" not in st.session_state:
     st.session_state.active_tab = "📤 Upload de bases"
 
 # Função para scrollar para o topo
-def scroll_top():
+#def scroll_top():
     # força o scroll no elemento pai (iframe) do app
-    components.html(
-        """
-        <script>
-            // tenta rolar a janela principal
-            if (window.parent) {
-                try { window.parent.scrollTo(0, 0); } catch (e) {}
-                // fallback: tenta rolar a seção principal do Streamlit
-                try {
-                    const sec = window.parent.document.querySelector('section.main');
-                    if (sec) { sec.scrollTo({top: 0, left: 0, behavior: "instant"}); }
-                } catch (e) {}
-            } else {
-                window.scrollTo(0, 0);
-            }
-        </script>
-        """,
-        height=0,
-    )
+#    components.html(
+#        """
+#        <script>
+#            // tenta rolar a janela principal
+#            if (window.parent) {
+#                try { window.parent.scrollTo(0, 0); } catch (e) {}
+#                // fallback: tenta rolar a seção principal do Streamlit
+#                try {
+#                    const sec = window.parent.document.querySelector('section.main');
+#                    if (sec) { sec.scrollTo({top: 0, left: 0, behavior: "instant"}); }
+#                } catch (e) {}
+#            } else {
+#                window.scrollTo(0, 0);
+#            }
+#        </script>
+#        """,
+#        height=0,
+#    )
+
+def scroll_top():
+    st.markdown("""
+    <script>
+      try {
+        if (window.parent) {
+          window.parent.scrollTo(0, 0);
+          const sec = window.parent.document.querySelector('section.main');
+          if (sec) sec.scrollTo({top: 0, left: 0, behavior: "instant"});
+        } else {
+          window.scrollTo(0, 0);
+        }
+      } catch (e) {}
+    </script>
+    """, unsafe_allow_html=True)
 
 # Callback do botão
 def go_to_sim():
