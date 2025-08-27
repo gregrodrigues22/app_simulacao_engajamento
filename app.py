@@ -218,7 +218,7 @@ def plot_resultado_stack(resultado: pd.DataFrame,
     # controla eixo Y nas duas subplots
     fig.update_yaxes(range=[0, ymax], row=1, col=1)
     fig.update_yaxes(range=[0, ymax], row=1, col=2)
-git add .
+    
     fig.update_layout(
         title="Gráfico de Engajamento Atual por subpopulação (n e %)",
         barmode="stack",
